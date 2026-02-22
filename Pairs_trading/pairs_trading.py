@@ -1,7 +1,7 @@
 # simple pairs trading algorithm
 # USE THIS TO CHECK IF TWO STOCKS ARE WORTHY
 #21 feb 2026
-# note: change out the ticker 1 and 7 for other stocks to test their correlation
+# note: change out the ticker 1 and 2 for other stocks to test their correlation
 # we want Cointegration (p < 0.05), rolling corr >0.8ish  and ratio plots close to their mean lines. 
 
 
