@@ -1,15 +1,27 @@
 Explaination behind this model:
 
-Engele-Granger cointegration test is used in the ver first function:
+Engele-Granger cointegration test is used in the ver first function: check_cointegration()
   checks if the spread between two stocks keeps returning to a fixed mean (they're cointegrated) or not.
   it produces a p-value to indicate if this level of cointigration is statistically significant or not.
   shocking example was GOOG and GOOGL which had p-value 0.0116
   ideally we only trade stocks with p-value <0.05
   note the test stat ("score" in the code): more negative ==> more cointegrated.
 
-Linear regression used in the second function:
+Linear regression used in the second function: calculate_hedge_ratio()
   using the simple formula: ticker2 = α + β (ticker1) + ε
   note: β = hedge ratio (ie how many shares of ticker2 offset 1 share of ticker1)
   α = the intercept, ε = the residule
   interesting example: GOOG (2) vs GOOGL (1) had β = 1.0048 (so for every 1 share of GOOGL we need 1.0048 shares of GOOG to be hedged - pretty much 1:1).
   also had r-squared of 0.9994 - ie 99.94% of GOOG's movement is explained by GOOGL.
+
+calculatin the spread between the two stocks: calculate_spread()
+   note we must scale the 2nd stock by the hedge ratio, as we cannot simply subtract the price of the two stocks. so rather than the dollar difference in their prices, we look at 
+   the difference in their prices relative to eachother. 
+   the spread is the pricing error or mispricing between the two stocks.
+
+creating the z-score: calculate_zscore()
+  note the rolling() creates a rolling wondow meaning its like a fixed-size window that moves over the dataset, and then we take mean()'s over each window. 
+  also .std() takes the standard deviation/ volitility over each of these windows. 
+  note: with the stocks having a z-score we can now compare this pair to other pairs of stocks, using the same metric (zscore). also if markets change in volitility, then the 
+  rolling std will adjust. 
+
