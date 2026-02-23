@@ -1,0 +1,15 @@
+Explaination behind this model:
+
+Engele-Granger cointegration test is used in the ver first function:
+  checks if the spread between two stocks keeps returning to a fixed mean (they're cointegrated) or not.
+  it produces a p-value to indicate if this level of cointigration is statistically significant or not.
+  shocking example was GOOG and GOOGL which had p-value 0.0116
+  ideally we only trade stocks with p-value <0.05
+  note the test stat ("score" in the code): more negative ==> more cointegrated.
+
+Linear regression used in the second function:
+  using the simple formula: ticker2 = α + β (ticker1) + ε
+  note: β = hedge ratio (ie how many shares of ticker2 offset 1 share of ticker1)
+  α = the intercept, ε = the residule
+  interesting example: GOOG (2) vs GOOGL (1) had β = 1.0048 (so for every 1 share of GOOGL we need 1.0048 shares of GOOG to be hedged - pretty much 1:1).
+  also had r-squared of 0.9994 - ie 99.94% of GOOG's movement is explained by GOOGL.
