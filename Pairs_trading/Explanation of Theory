@@ -67,43 +67,6 @@ note on interpreting the extra statistics att he end:
   max drawdown - eg GOOGL/GOOG  was -3.2 ==> we never lost more than 3.2% of our capital.
   
 
-An example output:
-
-==================================================
-PAIRS TRADING ANALYSIS: GOOGL vs GOOG
-==================================================
-
---- Cointegration Test ---
-P-value: 0.0163
-Pairs ARE cointegrated
-Hedge ratio: 1.0048
-R-squared: 0.9994
-
---- Backtest Results ---
-Total Return: 5.12%
-Sharpe Ratio: 1.99
-Number of trades: 18
-Number of days holding a position: 127
-
---------------------------------------------------
-EXTRA STATISTICS
---------------------------------------------------
-
---- Trade Statistics ---
-Total trades: 17
-Winning trades: 16
-Losing trades: 1
-Trade Win Rate: 94.1%
-Average trade return: 0.29%
-Average win: 0.31%
-Average loss: -0.02%
-Average trade duration: 7.3 days
-Profit Factor: 277.27
-==================================================
----END---
-==================================================
-
-
 
 Notes for improvement:
 - better data cleaning process 
