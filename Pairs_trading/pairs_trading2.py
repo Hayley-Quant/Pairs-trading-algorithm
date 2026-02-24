@@ -277,7 +277,7 @@ axes[4].set_title('Strategy Drawdown %')
 axes[4].set_ylabel('Drawdown %')
 axes[4].grid(True, alpha=0.3)
 
-# Add max drawdown annotation
+# Add max drawdown annotation - uncomment if you want the arrow figure
 max_drawdown = drawdown.min()
 max_dd_date = drawdown.idxmin()
 #axes[4].annotate(f'Max Drawdown: {max_drawdown:.1f}%', 
@@ -294,31 +294,79 @@ plt.tight_layout()
 plt.show()
 
 
-# extra statistics:
-# creating a series to track the difference in the price ratio of the two stocks:
-ratio = prices[ticker1] / prices[ticker2]
+# extra statistics"
 
-print(f"\n--- Ratio Statistics ---")
-# the average ratio over the whole period:
-print(f"Mean ratio: {ratio.mean():.4f}")
-# the standard deviation (volatility) of the ratio:
-print(f"Ratio std dev: {ratio.std():.4f}")
-# the most recent ratio:
-print(f"Current ratio: {ratio.iloc[-1]:.4f}")
+print("\n" + "-"*50)
+print("EXTRA STATISTICS")
+print("-"*50)
 
-# calculate and print the max drawdown (ie the worst peak-to-trough decline):
-print(f"Max Drawdown: {max_drawdown:.2f}%")
-# say when this catastorphy happened:
-print(f"Max Drawdown Date: {max_dd_date.strftime('%Y-%m-%d')}")
+# calculate the trade win rate:
+# pos1.dif() = 1 when the positoin changes (1 to 0 or 0 to 1), then cumsum() gives each trade a number id:
+position_changes = (pos1.diff() != 0).cumsum()
+# where we'll store the total returns of each trade:
+trade_returns = []
+current_trade_return = 0
+# day index for the current trade starts:
+trade_start = None
+# where we'll store the length of each trade (in days):
+trade_durations = []
+
+# looping thru each day:
+for i in range(1, len(daily_returns)):
+    # if today's position is not the same as yesterday's:
+    if position_changes.iloc[i] != position_changes.iloc[i-1]:
+        # if we just exited a position:
+        if current_trade_return != 0:
+            #save the trade's total return to trade_returns:
+            trade_returns.append(current_trade_return)
+            # record the duration (no. days) of the position:
+            trade_durations.append(i - trade_start)
+            # reset the position duration counter:
+            current_trade_return = 0
+        # start a new trade:
+        trade_start = i
+    # add today's return to the current trades accumulation:
+    current_trade_return += daily_returns.iloc[i]
 
 
-# Win rate:
-# count how many days we had a positive return:
-winning_trades = (daily_returns > 0).sum()
-# count the total days in our backtest:
-total_trading_days = len(daily_returns)
-# calculate percent of days the were winners:
-win_rate = winning_trades / total_trading_days * 100
-print(f"Win Rate: {win_rate:.1f}%")
+# calculating the basic metrics:
+winning_trades = sum(1 for r in trade_returns if r > 0) # trades with pos return
+losing_trades = sum(1 for r in trade_returns if r < 0) # trades with neg return
+total_trades = len(trade_returns)
+# percent of trades that were winners:
+trade_win_rate = winning_trades / total_trades * 100 if total_trades > 0 else 0
 
+# calculating average trade return:
+# average return per trade (as a %):
+avg_trade_return = sum(trade_returns) / total_trades * 100 if total_trades > 0 else 0
+# average size of the winning trades:
+avg_win = sum(r for r in trade_returns if r > 0) / winning_trades * 100 if winning_trades > 0 else 0
+# average size of the loosing trades:
+avg_loss = sum(r for r in trade_returns if r < 0) / losing_trades * 100 if losing_trades > 0 else 0
+# average length of a trade:
+avg_duration = sum(trade_durations) / total_trades if total_trades > 0 else 0
+
+# Profit factor (gross profit / gross loss)
+# sum all winning trades:
+gross_profit = sum(r for r in trade_returns if r > 0)
+# sum all loosing trades:
+gross_loss = abs(sum(r for r in trade_returns if r < 0))
+# divides total wins by total losses:
+profit_factor = gross_profit / gross_loss if gross_loss > 0 else float('inf')
+
+# print it all out:
+print(f"\n--- Trade Statistics ---")
+print(f"Total trades: {total_trades}")
+print(f"Winning trades: {winning_trades}")
+print(f"Losing trades: {losing_trades}")
+print(f"Trade Win Rate: {trade_win_rate:.1f}%")
+print(f"Average trade return: {avg_trade_return:.2f}%")
+print(f"Average win: {avg_win:.2f}%")
+print(f"Average loss: {avg_loss:.2f}%")
+print(f"Average trade duration: {avg_duration:.1f} days")
+print(f"Profit Factor: {profit_factor:.2f}")
+
+print("="*50)
+print("---END---")
+print("="*50)
 # END 
