@@ -11,7 +11,7 @@ Linear regression used in the second function: calculate_hedge_ratio()
   using the simple formula: ticker2 = α + β (ticker1) + ε
   note: β = hedge ratio (ie how many shares of ticker2 offset 1 share of ticker1)
   α = the intercept, ε = the residule
-  interesting example: GOOG (2) vs GOOGL (1) had β = 1.0048 (so for every 1 share of GOOGL we need 1.0048 shares of GOOG to be hedged - pretty much 1:1).
+  interesting example: GOOG (2) vs GOOGL (1) had β = 1.0048 (so for every 1 share of GOOGL we need 1.0048 shares of GOOG to be hedged -     pretty much 1:1).
   also had r-squared of 0.9994 - ie 99.94% of GOOG's movement is explained by GOOGL.
 
 calculatin the spread between the two stocks: calculate_spread()
@@ -25,3 +25,36 @@ creating the z-score: calculate_zscore()
   note: with the stocks having a z-score we can now compare this pair to other pairs of stocks, using the same metric (zscore). also if markets change in volitility, then the 
   rolling std will adjust. 
 
+creating the signals: generate_signals()
+  we use pandas series (pd.series() ) to create two empty 1D arrays (columns) to store the positions we take each day. using the index as the same 
+  index as the zscore uses (just the dates). we prefill all the data with 0's so we can iterate over it later with either +1 (long), -1 (short) 
+  or remain at 0 (flat). 
+  To enter a trade, the zscore entry threshold is set at 2, and exit at 0 (this can be changed). 
+   note: "long spread" means we're betting the spread will increase back to normal/ the mean. and "short spread" means we think the spread will
+   shrink back to the mean. 
+
+backtesting: backtest()
+  when calculating the strategy returns we first shift over all elements in the position1 and position2 series by 1, so that yesterdays' position
+  will determine todays' returns. 
+  effectivly: today's return = (yesterday's position in stock1 × today's return of stock1) + (yesterday's position in stock2 × today's return of stock2). 
+  (note position = 1 or -1 or 0). 
+ 
+  in creating the cumulative returns variable, we must add the +1 to each strategy returns so when multiplying the sequence of strategy returns
+  it does not become megative, nor multiplied incorrectyl. (eg a 5% return followed by a 2% return should be 1.05x10.2 = 1.071, not 0.05x0.02 = 0.01). 
+  the cumulative returns gives us the equity curve (plotted) - ie showing how $1 invested with this model would have grown. 
+  note on calculating the total retun over multiple periods: using the formula: (1 + r₁) × (1 + r₂) × ... × (1 + rₙ) - 1 where we minus 1 at the end
+  to convert the growth multiplier back into a return percentage. (eg: the final figure of the growth multiplier is 1.08, meaning for $1 you started with
+  you now have $1.08, and so as a total return percentage, this is 1.08 - 1 = 0.08 or 8% growth). 
+
+  the sharpe ratio measures the risk adjested return. we use the standard deviation of the strategy_return variable as the measurement of risk/volitility. 
+  so in combination we get mean divided by std which gives us the unit: how much return per unit of risk. 
+  then we use sqt(252) which comes from 𝜎^2 = N where N = number of trading days in a year, and 𝜎^2 = daily variances, then rearange for 𝜎 = sqt(252). 
+  note 𝜎 (unsquared) represents standard deviation. 
+  note: sharpe S >2 = excellent ,<2 S >1 = good, <1 S >0.5 = ok, S <0.5 = not worth it. 
+
+  when looking at the number of trades and number of days holding a position output, be mindful of the number of years of historical date you are using. 
+
+
+Notes for improvement:
+- better data cleaning process 
+- 
