@@ -54,7 +54,9 @@ backtesting: backtest()
 
   when looking at the number of trades and number of days holding a position output, be mindful of the number of years of historical date you are using. 
 
+in the construction of the graphs:
+  
 
 Notes for improvement:
 - better data cleaning process 
-- 
+- better graphs - flexible sizing - remove the stickiness
