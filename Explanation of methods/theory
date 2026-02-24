@@ -50,7 +50,7 @@ backtesting: backtest()
   so in combination we get mean divided by std which gives us the unit: how much return per unit of risk. 
   then we use sqt(252) which comes from 𝜎^2 = N where N = number of trading days in a year, and 𝜎^2 = daily variances, then rearange for 𝜎 = sqt(252). 
   note 𝜎 (unsquared) represents standard deviation. 
-  note: sharpe S >2 = excellent ,<2 S >1 = good, <1 S >0.5 = ok, S <0.5 = not worth it. 
+  note: sharpe S >2 = excellent ,<2 S >1.5 = good, <1.5 S >1 = ok, S <1 = not worth it. 
 
   when looking at the number of trades and number of days holding a position output, be mindful of the number of years of historical date you are using. 
 
@@ -64,8 +64,46 @@ simplifying the meaning of the graphs:
 note on interpreting the extra statistics att he end:
   average ratio - eg GOOGL/GOOG had 0.9946 - meaning GOOGL traded at about 99.46% of GOOG's price on average.
   the standard deviation (volatility) of the ratio - eg GOOGL/GOOG had 0.0033, meaning the ratio barley moves (good for pairs trading). 
-  max drawdown - eg GOOGL/GOOG  was -3.2 ==> we never lost more than 3.2% of our capital.n
+  max drawdown - eg GOOGL/GOOG  was -3.2 ==> we never lost more than 3.2% of our capital.
   
+
+An example output:
+
+==================================================
+PAIRS TRADING ANALYSIS: GOOGL vs GOOG
+==================================================
+
+--- Cointegration Test ---
+P-value: 0.0163
+Pairs ARE cointegrated
+Hedge ratio: 1.0048
+R-squared: 0.9994
+
+--- Backtest Results ---
+Total Return: 5.12%
+Sharpe Ratio: 1.99
+Number of trades: 18
+Number of days holding a position: 127
+
+--------------------------------------------------
+EXTRA STATISTICS
+--------------------------------------------------
+
+--- Trade Statistics ---
+Total trades: 17
+Winning trades: 16
+Losing trades: 1
+Trade Win Rate: 94.1%
+Average trade return: 0.29%
+Average win: 0.31%
+Average loss: -0.02%
+Average trade duration: 7.3 days
+Profit Factor: 277.27
+==================================================
+---END---
+==================================================
+
+
 
 Notes for improvement:
 - better data cleaning process 
