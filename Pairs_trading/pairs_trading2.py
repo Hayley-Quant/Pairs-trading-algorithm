@@ -200,55 +200,79 @@ def backtest(prices, positions1, positions2, ticker1, ticker2):
 cum_returns, daily_returns = backtest(prices, pos1, pos2, ticker1, ticker2)
 
 
-# create 5 plots:
+# create 5 plots (one column, 5 rows):
 fig, axes = plt.subplots(5, 1, figsize=(12, 18))
 
-# Plot 1: Normalized prices
+
+# Plot 1: normalized prices
+# firstly normalize the prices - divide each days price by the very first day's price:
 norm_prices = prices / prices.iloc[0]
+# plot the two stocks on the same graph (x-axis: dates (our index), yaxis: norm_prices):
 axes[0].plot(norm_prices.index, norm_prices[ticker1], label=ticker1, linewidth=1.5)
 axes[0].plot(norm_prices.index, norm_prices[ticker2], label=ticker2, linewidth=1.5)
+# set up the title, ledgend and 30% opacity background:
 axes[0].set_title(f'{ticker1} vs {ticker2} - Normalized Prices (Base=100)')
 axes[0].legend()
 axes[0].grid(True, alpha=0.3)
 
-# Plot 2: Z-Score with signals
+
+# Plot 2: z-Score and signals
+# on the second axis (index 1 tho) plot the zscore in blue with opacity 70% for the line:
 axes[1].plot(zscore.index, zscore, color='blue', alpha=0.7, linewidth=1)
+# draw horizonal lines at y = -2(entry threshold for longs), 0(mean/exit threshold), 2(entry threshold for shorts):
 axes[1].axhline(y=2, color='red', linestyle='--', label='Entry (+2)')
 axes[1].axhline(y=-2, color='green', linestyle='--', label='Entry (-2)')
 axes[1].axhline(y=0, color='black', linestyle='-', linewidth=0.5)
+# make the title and ledgend and background opacity at 30%:
 axes[1].set_title('Z-Score with Trading Signals')
 axes[1].legend()
 axes[1].grid(True, alpha=0.3)
 
-# Color the trades on z-score plot
+# when position was long, colour it in yellow, and short - colour orange:
 for i in range(len(zscore)):
     if pos1.iloc[i] != 0:
         color = 'yellow' if pos1.iloc[i] == 1 else 'orange'
         axes[1].axvline(x=zscore.index[i], color=color, alpha=0.15)
 
-# Plot 3: Spread
+
+# Plot 3: the spread:
+# plotting the line purple now:
 axes[2].plot(spread.index, spread, color='purple', linewidth=1)
+# at the average spread value put a dotted line:
 axes[2].axhline(y=spread.mean(), color='red', linestyle='--', label=f'Mean: {spread.mean():.2f}')
+# shading in a greay area of 1 std abover and below the mean:
 axes[2].fill_between(spread.index, 
                      spread.mean() - spread.std(), 
                      spread.mean() + spread.std(), 
                      alpha=0.2, color='gray', label='±1 Std Dev')
+# make title, ledgend and opacity at 30%:
 axes[2].set_title('Spread with Mean and Standard Deviation')
 axes[2].legend()
 axes[2].grid(True, alpha=0.3)
 
-# Plot 4: Cumulative returns
+
+# Plot 4: cumulative returns
+# make the equity curve in green (THICK):
 axes[3].plot(cum_returns.index, cum_returns, color='green', linewidth=2)
+# make a horizontal line at y=1 (the break even point):
 axes[3].axhline(y=1, color='black', linestyle='-', alpha=0.3)
+# title etc:
 axes[3].set_title('Strategy Cumulative Returns')
 axes[3].set_ylabel('Cumulative Return (x)')
 axes[3].grid(True, alpha=0.3)
 
-# Plot 5: Drawdown
+
+# Plot 5: drawdown/ measuring the risk
+# note expanding().max() gives us the highest so far up to each of the days:
+# note explanding() is a window that increases to include each next element/day. 
 rolling_max = cum_returns.expanding().max()
+# drawdown is the percent by which you're down from a peak:
 drawdown = (cum_returns - rolling_max) / rolling_max * 100
+# colour in red the areas where the drawdown line is below 0:
 axes[4].fill_between(drawdown.index, drawdown, 0, color='red', alpha=0.4)
+# make the black line at y = 0:
 axes[4].axhline(y=0, color='black', linestyle='-', linewidth=0.5)
+# title etc
 axes[4].set_title('Strategy Drawdown %')
 axes[4].set_ylabel('Drawdown %')
 axes[4].grid(True, alpha=0.3)
@@ -256,30 +280,45 @@ axes[4].grid(True, alpha=0.3)
 # Add max drawdown annotation
 max_drawdown = drawdown.min()
 max_dd_date = drawdown.idxmin()
-axes[4].annotate(f'Max Drawdown: {max_drawdown:.1f}%', 
-                xy=(max_dd_date, max_drawdown),
-                xytext=(max_dd_date, max_drawdown - 5),
-                arrowprops=dict(facecolor='black', shrink=0.05, width=1, headwidth=5),
-                fontsize=10)
+#axes[4].annotate(f'Max Drawdown: {max_drawdown:.1f}%', 
+#                xy=(max_dd_date, max_drawdown),
+#                xytext=(max_dd_date, max_drawdown - 5),
+#                arrowprops=dict(facecolor='black', shrink=0.05, width=1, headwidth=5),
+#                fontsize=10)
 
+# automatically adjusts spacing:
 plt.tight_layout()
-plt.savefig('pairs_trading_results.png', dpi=300, bbox_inches='tight')
+# optional: have it automatically save:
+#plt.savefig('pairs_trading_results.png', dpi=300, bbox_inches='tight')
+# will disply this figure as a popup:
 plt.show()
 
-# --- PART 6: Additional Statistics ---
+
+# extra statistics:
+# creating a series to track the difference in the price ratio of the two stocks:
 ratio = prices[ticker1] / prices[ticker2]
+
 print(f"\n--- Ratio Statistics ---")
+# the average ratio over the whole period:
 print(f"Mean ratio: {ratio.mean():.4f}")
+# the standard deviation (volatility) of the ratio:
 print(f"Ratio std dev: {ratio.std():.4f}")
+# the most recent ratio:
 print(f"Current ratio: {ratio.iloc[-1]:.4f}")
 
-# Calculate and print max drawdown
+# calculate and print the max drawdown (ie the worst peak-to-trough decline):
 print(f"Max Drawdown: {max_drawdown:.2f}%")
+# say when this catastorphy happened:
 print(f"Max Drawdown Date: {max_dd_date.strftime('%Y-%m-%d')}")
 
-# Win rate
+
+# Win rate:
+# count how many days we had a positive return:
 winning_trades = (daily_returns > 0).sum()
+# count the total days in our backtest:
 total_trading_days = len(daily_returns)
+# calculate percent of days the were winners:
 win_rate = winning_trades / total_trading_days * 100
 print(f"Win Rate: {win_rate:.1f}%")
 
+# END 
